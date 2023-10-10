@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Social Media</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-4">
+    <h1>Create  a Post </h1>
+    <form id="Form">
+      <div class="mb-3">
+        <label for="url" class="form-label">Post Link</label>
+        <input type="url" class="form-control" id="url" required>
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Post Description</label>
+        <input type="text" class="form-control" id="description" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit Post</button>
+    </form>
+    <ul id="posts" class="mt-4 list-group"></ul>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      const Form = document.getElementById('Form');
+      const posts = document.getElementById('posts');
+      const API_BASE_URL = 'https://crudcrud.com/api/1c9f74fd6a064a21a8508194ee99d3f1';
+
+      async function fetchPosts() {
+        try {
+          const response = await axios.get(`${API_BASE_URL}/posts`);
+          const postsFetched = response.data;
+
+          posts.innerHTML = '';
+
+          postsFetched.forEach(post => {
+            const li = createListItem(post);
+            posts.appendChild(li);
+          });
+        } catch (error) {
+          console.error('Error fetching posts:', error);
+        }
+      }
+
+      function createListItem(post) {
+        const li = document.createElement('li');
+        li.classList.add('list-group-item');
+        li.style.display = 'flex';
+        li.style.flexDirection = 'column';
+        li.style.alignItems = 'center';
+
+        const imagePlaceholder = document.createElement('div');
+        li.appendChild(imagePlaceholder);
+
+        const image = document.createElement('img');
+        console.log(post.url)
+        image.src = post.url;
+        // image.alt = 'Post image';
+        image.style.display = 'block';
+        image.width =500 ;
+        image.height = 300 ;
+        image.addEventListener('load', function() {
+              li.replaceChild(image, imagePlaceholder);
+        });
+        // li.appendChild(image);
+
+        const Text = document.createTextNode(` ${post.description}`);
+        li.appendChild(Text);
+
+        const commentBox = document.createElement('div');
+        commentBox.style.display = 'flex';
+        commentBox.style.justifyContent = 'space-between';
+        commentBox.style.width = '100%';
+
+        const commentInput = document.createElement('input');
+        commentInput.type = 'text';
+        commentInput.classList.add('comment-input');
+        commentInput.placeholder = 'Write a comment...';
+        commentBox.appendChild(commentInput);
+
+        
+
+        const saveCommentButton = document.createElement('button');
+        saveCommentButton.type = 'button';
+        saveCommentButton.classList.add('save-comment-button', 'btn', 'btn-sm', 'btn-primary', 'float-end');
+        saveCommentButton.textContent = 'Save comment';
+        commentBox.appendChild(saveCommentButton);
+
+        li.appendChild(commentBox);
+
+        const commentsList = document.createElement('ul');
+        commentsList.classList.add('comments');
+        li.appendChild(commentsList);
+        
+
+        // saveCommentButton.addEventListener('click', async function () {
+        //   try {
+        //     await axios.post(`${API_BASE_URL}/deleteexpense`,expense);
+        //     li.remove();
+        //   } catch (error) {
+        //     console.error('Error deleting expense:', error);
+        //   }
+        // });
+
+        // editBtn.addEventListener('click', async function () {
+        //   document.getElementById('amount').value = expense.amount;
+        //   document.getElementById('description').value = expense.description;
+        //   document.getElementById('category').value = expense.category;
+        //   try {
+        //     await axios.post(`${API_BASE_URL}/deleteexpense`,expense);
+        //     li.remove();
+        //   } catch (error) {
+        //     console.error('Error deleting expense:', error);
+        //   }
+        // });
+
+        return li;
+      }
+
+      Form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const url = document.getElementById('url').value;
+        const description = document.getElementById('description').value;
+
+        const post = {
+          url,
+          description,
+        };
+
+        try {
+          await axios.post(`${API_BASE_URL}/posts`, post);
+          await fetchPosts();
+        } catch (error) {
+          console.error('Error adding post:', error);
+        }
+
+        Form.reset();
+      });
+
+      fetchPosts();
+
+    });
+
+  </script>
+</body>
+</html>
